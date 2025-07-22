@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Códigos de invitación
+model InvitationCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  isUsed      Boolean   @default(false)
+  usedBy      String?
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+  maxUses     Int       @default(1)
+  currentUses Int       @default(0)
+}
+
+// Enum para roles de usuario
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Modelo de Usuario
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  password       String
+  role           UserRole       @default(USER)
+  invitationCode String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  profile        Profile?
+  menus          Menu[]
+  shoppingLists  ShoppingList[]
+}
+
+// Perfil nutricional del usuario
+model Profile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age                 Int?
+  weight              Float?
+  height              Float?
+  gender              String?
+  activityLevel       String?
+  goal                String? // "maintain", "lose", "gain"
+  dailyCalories       Int?
+  dailyProtein        Int?
+  dailyCarbs          Int?
+  dailyFat            Int?
+  dietaryRestrictions String[]
+  foodPreferences     String[]
+  allergies           String[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// Ingredientes disponibles en el sistema
+model Food {
+  id                String           @id @default(cuid())
+  name              String           @unique
+  category          String // "protein", "carb", "vegetable", "fruit", "dairy", "fat", etc.
+  calories          Float
+  protein           Float
+  carbs             Float
+  fat               Float
+  fiber             Float?
+  sugar             Float?
+  saturatedFat      Float?
+  unsaturatedFat    Float?
+  sodium            Float?
+  potassium         Float?
+  calcium           Float?
+  iron              Float?
+  vitaminA          Float?
+  vitaminC          Float?
+  vitaminD          Float?
+  vitaminE          Float?
+  commonPortionSize Float
+  commonPortionUnit String
+  alternativesIds   String[]
+  isVegetarian      Boolean          @default(false)
+  isVegan           Boolean          @default(false)
+  isGlutenFree      Boolean          @default(false)
+  isLactoseFree     Boolean          @default(false)
+  isNutFree         Boolean          @default(false)
+  tags              String[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  recipeItems       RecipeItem[]
+  mealIngredients   MealIngredient[]
+}
+
+// Recetas
+model Recipe {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  type          String? // "breakfast", "lunch", "dinner", "snack", "dessert"
+  instructions  String?
+  prepTime      Int? // en minutos
+  cookTime      Int? // en minutos
+  servings      Int          @default(1)
+  calories      Float
+  protein       Float
+  carbs         Float
+  fat           Float
+  tags          String[]
+  isVegetarian  Boolean      @default(false)
+  isVegan       Boolean      @default(false)
+  isGlutenFree  Boolean      @default(false)
+  isLactoseFree Boolean      @default(false)
+  isNutFree     Boolean      @default(false)
+  imageUrl      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         RecipeItem[]
+  menuItems     MenuItem[]
+}
+
+// Ingredientes de una receta con cantidades
+model RecipeItem {
+  id        String   @id @default(cuid())
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  foodId    String
+  food      Food     @relation(fields: [foodId], references: [id])
+  quantity  Float
+  unit      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Menú (puede ser diario o semanal)
+model Menu {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String?
+  description  String?
+  type         String // "daily" o "weekly"
+  isFavorite   Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  items        MenuItem[]
+  shoppingList ShoppingList?
+}
+
+// Elementos de un menú (ahora contiene ingredientes directos)
+model MenuItem {
+  id        String   @id @default(cuid())
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  name      String // Nombre descriptivo de la comida
+  mealType  String // "breakfast", "lunch", "dinner", "snack"
+  dayOfWeek Int? // Para menús semanales
+  servings  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con ingredientes individuales
+  ingredients MealIngredient[]
+
+  // Mantener compatibilidad temporal con recetas (opcional)
+  recipeId String?
+  recipe   Recipe? @relation(fields: [recipeId], references: [id])
+}
+
+// Ingredientes individuales dentro de un MenuItem
+model MealIngredient {
+  id         String   @id @default(cuid())
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  foodId     String
+  food       Food     @relation(fields: [foodId], references: [id])
+  quantity   Float // cantidad
+  unit       String // unidad de medida
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Lista de compras generada a partir de un menú
+model ShoppingList {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menuId    String             @unique
+  menu      Menu               @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  items     ShoppingListItem[]
+}
+
+// Elementos de la lista de compras
+model ShoppingListItem {
+  id             String       @id @default(cuid())
+  shoppingListId String
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  ingredientId   String
+  name           String
+  amount         Float
+  unit           String
+  purchased      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}

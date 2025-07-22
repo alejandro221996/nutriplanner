@@ -39,3 +39,43 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma
+/src/generated/prisma
+
+# database
+*.db
+*.sqlite
+*.sqlite3
+
+# logs
+logs
+*.log
+
+# temporary files
+*.tmp
+*.temp
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Backup files
+*.bak
+*.backup
+
+# Test files (if you don't want to commit them)
+/src/app/scripts/check*.ts
+/src/app/scripts/createTestUsers.ts
+
+# Proposal files (temporary)
+schema-proposal.prisma
+
+# Development files
+DEVELOPMENT.md
