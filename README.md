@@ -6,46 +6,70 @@
 
 ## 🚀 Características
 
-- ✅ Configuración de perfiles de usuario
-- 🔥 Cálculo automático de calorías y macronutrientes
-- 🧠 Generación inteligente de menús personalizados
-- 📅 Planificación semanal de comidas
-- 🛒 Lista de compras basada en menús (por semana o por día)
-- 💾 Almacenamiento de menús favoritos
-- ♻️ Sustituciones automáticas de ingredientes
-- 📄 Exportación de menús (diarios y semanales) en PDF
+- ✅ Configuración de perfiles de usuario con objetivos nutricionales
+- 🔥 Cálculo automático de calorías y macronutrientes basado en perfil
+- 🧠 Generación inteligente de menús personalizados con algoritmos adaptativos
+- 📅 Planificación diaria y semanal de comidas
+- 🛒 Lista de compras automática basada en menús seleccionados
+- 💾 Almacenamiento de menús favoritos y historial
+- ♻️ Sustituciones automáticas de ingredientes según disponibilidad
+- 📄 Exportación de menús y listas de compras en PDF
+- 👥 Sistema de administración con códigos de invitación
+- 🔐 Autenticación personalizada con bcrypt
 
 ---
 
-## 🧰 Tecnologías
+## 🧰 Stack Tecnológico
 
-- ⚛️ [Next.js 14](https://nextjs.org/docs) (App Router)
-- 🟦 TypeScript
-- 🎨 [Tailwind CSS](https://tailwindcss.com/)
-- 🐘 PostgreSQL
-- 🧬 [Prisma ORM](https://www.prisma.io/)
-- 🌐 **Context API** para la gestión global de estado
+- ⚛️ **[Next.js 15.4.2](https://nextjs.org/docs)** - Framework React con App Router
+- 🟦 **TypeScript 5.x** - Tipado estático con modo estricto
+- 🎨 **[Tailwind CSS 4.x](https://tailwindcss.com/)** - Framework CSS utility-first
+- 🐘 **PostgreSQL** - Base de datos relacional
+- 🧬 **[Prisma ORM 6.12.0](https://www.prisma.io/)** - ORM type-safe
+- 🔐 **bcryptjs** - Hash de contraseñas
+- 📄 **jsPDF + jspdf-autotable** - Generación de PDFs
+- 🌐 **React Context API** - Gestión de estado global
+- 🛠️ **ESLint + TypeScript** - Linting y análisis de código
 
 ---
 
-## 🧱 Arquitectura y Buenas Prácticas
+## 🏗️ Arquitectura del Proyecto
 
-- **Context API** para manejar estados globales como:
-  - Perfil del usuario
-  - Datos nutricionales y preferencias
-  - Menús generados y seleccionados
-  - Autenticación y sesión
+### Estructura de Directorios
+```
+nutriplaner/
+├── src/app/                 # Next.js App Router
+│   ├── api/                 # API Routes (REST endpoints)
+│   ├── components/          # Componentes React reutilizables
+│   ├── contexts/            # React Context providers
+│   ├── services/            # Lógica de negocio y servicios
+│   ├── types/               # Definiciones TypeScript
+│   ├── utils/               # Funciones utilitarias
+│   ├── hooks/               # Custom React hooks
+│   ├── lib/                 # Configuraciones de librerías
+│   └── scripts/             # Scripts de seeding y utilidades
+├── prisma/                  # Schema y migraciones de BD
+├── public/                  # Assets estáticos
+└── package.json
+```
 
-- **Estructura modular del proyecto:**
-  - `/app` - Rutas y páginas de la aplicación
-  - `/components` - Componentes reutilizables
-  - `/contexts` - Contextos para estado global
-  - `/hooks` - Hooks personalizados
-  - `/services` - Servicios para lógica de negocio
-  - `/utils` - Utilidades y funciones auxiliares
-  - `/types` - Definiciones de tipos TypeScript
-  - `/lib` - Bibliotecas y configuraciones
-  - `/public` - Archivos estáticos
+### Patrones de Arquitectura
+
+- **Context API** para estado global:
+  - `AuthContext` - Autenticación y sesión de usuario
+  - `ProfileContext` - Perfil nutricional y preferencias
+  - `MenuContext` - Menús generados y favoritos
+
+- **Servicios especializados:**
+  - `nutritionServiceClient` - Cálculos nutricionales
+  - `intelligentMenuService` - Algoritmos de generación de menús
+  - `menuService` - CRUD de menús
+  - `authService` - Autenticación y autorización
+
+- **Tipos TypeScript estrictos:**
+  - Interfaces para modelos de BD (User, Recipe, Menu, etc.)
+  - Tipos extendidos para lógica de negocio
+  - Validación de tipos en tiempo de compilación
 
 ---
 
@@ -109,7 +133,7 @@ pnpm dlx prisma studio         # Abrir Prisma Studio
 
 ---
 
-## � Usouarios de Prueba
+## 👥 Usuarios de Prueba
 
 Después de ejecutar `pnpm db:setup`, tendrás acceso a estos usuarios:
 
@@ -136,6 +160,68 @@ Para registrar nuevos usuarios, usa cualquiera de estos códigos:
 
 ---
 
+## 🔌 API Endpoints
+
+La aplicación expone una API REST completa para todas las funcionalidades:
+
+### Autenticación
+- `POST /api/auth/login` - Inicio de sesión
+- `POST /api/auth/register` - Registro de usuario
+
+### Perfiles de Usuario
+- `GET /api/profile/[userId]` - Obtener perfil
+- `PUT /api/profile/[userId]` - Actualizar perfil
+- `POST /api/profile` - Crear perfil
+
+### Menús y Planificación
+- `GET /api/menus/user/[userId]` - Obtener menús del usuario
+- `POST /api/nutrition/meal-plan/daily` - Generar plan diario
+- `POST /api/nutrition/meal-plan/weekly` - Generar plan semanal
+- `GET /api/nutrition/recipes` - Obtener recetas con información nutricional
+
+### Administración
+- `GET /api/admin/stats` - Estadísticas del sistema
+- `POST /api/admin/create` - Crear recursos administrativos
+- `POST /api/invitation-codes/validate` - Validar código de invitación
+- `POST /api/invitation-codes/use` - Usar código de invitación
+
+### Gestión de Usuarios (Admin)
+- `GET /api/users` - Listar usuarios
+- `GET /api/users/[id]` - Obtener usuario específico
+- `PUT /api/users/[id]/role` - Cambiar rol de usuario
+- `PUT /api/users/[id]/password` - Cambiar contraseña
+
+---
+
+## 🧪 Testing y Desarrollo
+
+### Variables de Entorno Requeridas
+```env
+# Base de datos
+DATABASE_URL="postgresql://user:password@localhost:5432/nutriplaner"
+
+# Autenticación (opcional para desarrollo)
+NEXTAUTH_SECRET="tu_secreto_seguro_aqui"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Configuración de la app
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### Scripts de Seeding Disponibles
+```bash
+# Seeding completo (recomendado para desarrollo)
+pnpm db:setup              # Migraciones + datos completos
+
+# Seeding específico
+pnpm db:seed:foods         # Solo alimentos
+pnpm db:seed:recipes       # Solo recetas
+pnpm db:seed:more-recipes  # Recetas adicionales
+pnpm db:users              # Solo usuarios de prueba
+```
+
+---
+
 ## 📝 Uso
 
 1. **Registro y Login**: Crea una cuenta o inicia sesión con los usuarios de prueba.
@@ -146,15 +232,56 @@ Para registrar nuevos usuarios, usa cualquiera de estos códigos:
 
 ---
 
+## 🚀 Deployment
+
+### Preparación para Producción
+1. **Variables de entorno:**
+   ```bash
+   # Configurar DATABASE_URL para PostgreSQL en producción
+   # Generar NEXTAUTH_SECRET seguro
+   # Configurar NEXT_PUBLIC_APP_URL con dominio real
+   ```
+
+2. **Build y optimización:**
+   ```bash
+   pnpm build    # Genera build optimizado
+   pnpm start    # Servidor de producción
+   ```
+
+3. **Base de datos:**
+   ```bash
+   npx prisma migrate deploy  # Aplicar migraciones en producción
+   ```
+
+### Consideraciones de Producción
+- Configurar conexión SSL para PostgreSQL
+- Implementar rate limiting en endpoints de API
+- Configurar logs y monitoreo
+- Optimizar imágenes y assets estáticos
+- Configurar CORS según necesidades
+
+---
+
 ## 🤝 Contribuciones
 
 Las contribuciones son bienvenidas. Por favor, sigue estos pasos:
 
-1. Haz fork del proyecto
-2. Crea una rama para tu característica (`git checkout -b feature/amazing-feature`)
-3. Haz commit de tus cambios (`git commit -m 'Add some amazing feature'`)
-4. Haz push a la rama (`git push origin feature/amazing-feature`)
-5. Abre un Pull Request
+1. **Fork del proyecto**
+2. **Crea una rama feature:** `git checkout -b feature/nueva-funcionalidad`
+3. **Sigue las convenciones:**
+   - Código TypeScript estricto
+   - Componentes funcionales con hooks
+   - Servicios para lógica de negocio
+   - Tests para funcionalidades críticas
+4. **Commit descriptivo:** `git commit -m 'feat: agregar nueva funcionalidad'`
+5. **Push y Pull Request:** `git push origin feature/nueva-funcionalidad`
+
+### Estándares de Código
+- **ESLint:** Seguir configuración de Next.js
+- **TypeScript:** Modo estricto habilitado
+- **Componentes:** Usar TypeScript interfaces
+- **API:** Validación de entrada y manejo de errores
+- **Base de datos:** Usar Prisma para todas las consultas
 
 ---
 
@@ -164,10 +291,36 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para má
 
 ---
 
-## 📞 Contacto
+## 🔧 Troubleshooting
 
-Si tienes preguntas o sugerencias, no dudes en contactarnos:
+### Problemas Comunes
 
-- Email: [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com)
-- Twitter: [@tu_usuario](https://twitter.com/tu_usuario)
-- GitHub: [tu-usuario](https://github.com/tu-usuario)
+**Error de conexión a BD:**
+```bash
+# Verificar que PostgreSQL esté ejecutándose
+# Revisar DATABASE_URL en .env
+npx prisma db push  # Sincronizar schema
+```
+
+**Errores de TypeScript:**
+```bash
+# Regenerar tipos de Prisma
+npx prisma generate
+# Verificar configuración tsconfig.json
+```
+
+**Problemas con seeding:**
+```bash
+# Limpiar y recrear BD
+npx prisma migrate reset
+pnpm db:setup
+```
+
+---
+
+## 📞 Soporte
+
+Para reportar bugs o solicitar funcionalidades:
+- **Issues:** Usar GitHub Issues con templates apropiados
+- **Documentación:** Consultar código y comentarios inline
+- **API:** Revisar tipos TypeScript para contratos de API
